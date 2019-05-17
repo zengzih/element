@@ -55,7 +55,7 @@
             v-if="showCancelButton"
             :round="roundButton"
             size="small"
-            @click.native="handleAction('cancel')"
+            @click.native="handleAction('cancel', 'btnEvent')"
             @keydown.enter="handleAction('cancel')">
             {{ cancelButtonText || t('el.messagebox.cancel') }}
           </el-button>
@@ -167,7 +167,7 @@
         this.opened = false;
         this.doAfterClose();
         setTimeout(() => {
-          if (this.action) this.callback(this.action, this);
+          if (this.action) this.callback(this.action, this, this.cancelEventType);
         });
       },
 
@@ -183,11 +183,12 @@
         }
       },
 
-      handleAction(action) {
+      handleAction(action, eventType) {
         if (this.$type === 'prompt' && action === 'confirm' && !this.validate()) {
           return;
         }
         this.action = action;
+        this.cancelEventType = eventType || '';
         if (typeof this.beforeClose === 'function') {
           this.close = this.getSafeClose();
           this.beforeClose(action, this, this.close);
@@ -308,6 +309,7 @@
         showConfirmButton: true,
         showCancelButton: false,
         action: '',
+        cancelEventType: '',
         confirmButtonText: '',
         cancelButtonText: '',
         confirmButtonLoading: false,

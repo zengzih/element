@@ -43,7 +43,8 @@ const MessageBoxConstructor = Vue.extend(msgboxVue);
 let currentMsg, instance;
 let msgQueue = [];
 
-const defaultCallback = action => {
+/* ----添加 cancelEventType 来区分是点击按钮关闭还是点击按钮以外关闭------*/
+const defaultCallback = (action, message, cancelEventType) => {
   if (currentMsg) {
     let callback = currentMsg.callback;
     if (typeof callback === 'function') {
@@ -61,7 +62,7 @@ const defaultCallback = action => {
           currentMsg.resolve(action);
         }
       } else if (currentMsg.reject && (action === 'cancel' || action === 'close')) {
-        currentMsg.reject(action);
+        currentMsg.reject({ type: action, cancelEventType });
       }
     }
   }
@@ -80,7 +81,7 @@ const showNextMsg = () => {
     initInstance();
   }
   instance.action = '';
-
+  instance.cancelEventType = '';
   if (!instance.visible || instance.closeTimer) {
     if (msgQueue.length > 0) {
       currentMsg = msgQueue.shift();
@@ -96,8 +97,8 @@ const showNextMsg = () => {
       }
 
       let oldCb = instance.callback;
-      instance.callback = (action, instance) => {
-        oldCb(action, instance);
+      instance.callback = (action, instance, cancelEventType) => {
+        oldCb(action, instance, cancelEventType);
         showNextMsg();
       };
       if (isVNode(instance.message)) {
